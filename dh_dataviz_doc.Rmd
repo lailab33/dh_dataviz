@@ -1,0 +1,152 @@
+```{r}
+#loading libraries
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(readr)
+library(timevis)
+library(stringr)
+```
+
+```{r}
+#loading csv document in to code
+data_copy <- read_csv("project_data.csv")
+```
+
+```{r}
+colnames(data_copy) <- c("college", "source", "description", "link", "date_source", "date_event", 
+"number_students", "scope_size", "reason", "cause", "tags", "against", "group_category", "group_name", "effect", "method", "location", "is_linked", "umbrella_tag", "text_ocr")
+```
+
+
+```{r}
+data_copy_college_pie <- data_copy %>% 
+  group_by(college) %>% 
+  count() %>% 
+  ungroup() %>%
+  mutate(per = n/sum(n))
+
+data_copy_college_pie$per <- round(data_copy_college_pie$per, 2)
+
+ggplot(data_copy_college_pie, aes(x="", y = per, fill = college)) +
+  geom_bar(stat="identity", width=1) +
+  coord_polar("y", start=0) + 
+  labs(x = NULL, y = NULL, fill = NULL) +
+  geom_text(aes(label = paste0(per,"%")), position = position_stack(vjust=0.5)) +
+  theme_classic() +
+  ggtitle("Percentage of sources from either college") +
+  theme(axis.line = element_blank(),
+          axis.text = element_blank(),
+          axis.ticks = element_blank()) +
+  scale_fill_brewer(palette="Blues")
+```
+
+
+```{r}
+#Bar plot for the size/scope of the protests, separated by college
+tbl <- with(data_copy, table(college, scope_size))
+
+ggplot(as.data.frame(tbl), aes(factor(scope_size), Freq, fill = college)) +     
+  geom_col() +
+  labs(fill= "Size of the prostest as the source objects describe") +
+  xlab("Scope of protests") +
+  ylab("Number of protests in each scope") + 
+  theme(axis.title.x = element_text(hjust=-0.8),
+        axis.title.y = element_text(vjust=0.8)) +
+  theme_classic() +
+  scale_fill_brewer(palette="Blues")
+```
+
+
+```{r}
+#Pie chart for the size/scope of the protests, NOT separated by college
+
+data_copy_scope_pie <- data_copy %>% 
+  group_by(scope_size) %>% 
+  count() %>% 
+  ungroup() %>%
+  mutate(per = n/sum(n))
+
+data_copy_scope_pie$per <- round(data_copy_scope_pie$per, 2)
+
+ggplot(data_copy_scope_pie, aes(x="", y = per, fill = scope_size)) +
+  geom_bar(stat="identity", width=1) +
+  coord_polar("y", start=0) + 
+  labs(x = NULL, y = NULL, fill = NULL) +
+  geom_text(aes(label = paste0(per,"%")), position = position_stack(vjust=0.5)) +
+  theme_classic() +
+  ggtitle("Size of the prostest as the sources objects describe for both colleges") +
+  theme(axis.line = element_blank(),
+          axis.text = element_blank(),
+          axis.ticks = element_blank()) +
+  scale_fill_brewer(palette="Blues")
+
+```
+
+```{r}
+#pie chart for the size/scope of protest of Vassar
+
+data_copy_scope_pie_vassar <- data_copy %>% 
+  filter(college=="Vassar") %>%
+  group_by(scope_size) %>% 
+  count() %>% 
+  ungroup() %>%
+  mutate(per = n/sum(n))
+
+data_copy_scope_pie_vassar$per <- round(data_copy_scope_pie_vassar$per, 2)
+
+ggplot(data_copy_scope_pie_vassar, aes(x="", y = per, fill = scope_size)) +
+  geom_bar(stat="identity", width=1) +
+  coord_polar("y", start=0) + 
+  labs(x = NULL, y = NULL, fill = NULL) +
+  geom_text(aes(label = paste0(per,"%")), position = position_stack(vjust=0.5)) +
+  theme_classic() +
+  ggtitle("Size of the prostest as the sources objects describe for Vassar") +
+  theme(axis.line = element_blank(),
+          axis.text = element_blank(),
+          axis.ticks = element_blank()) +
+  scale_fill_brewer(palette="Blues")
+```
+
+```{r}
+#pie chart for the size/scope of protest of Haverford
+
+data_copy_scope_pie_haverford <- data_copy %>% 
+  filter(college=="Haverford") %>%
+  group_by(scope_size) %>% 
+  count() %>% 
+  ungroup() %>%
+  mutate(per = n/sum(n))
+
+data_copy_scope_pie_haverford$per <- round(data_copy_scope_pie_haverford$per, 2)
+
+ggplot(data_copy_scope_pie_haverford, aes(x="", y = per, fill = scope_size)) +
+  geom_bar(stat="identity", width=1) +
+  coord_polar("y", start=0) + 
+  labs(x = NULL, y = NULL, fill = NULL) +
+  geom_text(aes(label = paste0(per,"%")), position = position_stack(vjust=0.5)) +
+  theme_classic() +
+  ggtitle("Size of the prostest as the sources objects describe for Haverford") +
+  theme(axis.line = element_blank(),
+          axis.text = element_blank(),
+          axis.ticks = element_blank()) +
+  scale_fill_brewer(palette="Blues")
+```
+
+```{r}
+#Timeline visualization of data
+
+data_copy_timevis <- data_copy %>%
+  select(college, date_source) %>% #, reason
+  drop_na("college") %>%
+  drop_na("date_source")
+
+colnames(data_copy_timevis) <- c("content", "start") #, "id"
+```
+
+
+```{r}
+timevis(data_copy_timevis,
+        showZoom = FALSE)
+        #options = list(editable = TRUE, height = "200px"))
+```
