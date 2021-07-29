@@ -16,15 +16,12 @@ ui <- fluidPage(
   
   titlePanel("Vassar and Haverford Protest Timeline"),
   
-  #adding white space to the visual
   br(),
+  helpText("This is an interactive timeline of protests recorded by Vassar and Haverford archives,",
+           "users can filter what kinds of protests they would like to view on the timeline and",
+           "those protests represented are in the table below. If you select a single protest",
+           "it will show up under the *Item selected* tab."),
   br(),
-  
-  titlePanel("Change settings"),
-  helpText("Select which protests you want to view.",
-           "Protests and their associated information will be listed in the table at the bottom",
-           "If you select a particular point of interest the associated information 
-           will be listed below the timeline"),
   
   # Create a new Row in the UI for selectInputs
   fluidRow(column(4, uiOutput("protest_dates")
@@ -62,21 +59,31 @@ ui <- fluidPage(
   ),
  
   br(),
-  br(),
   
    # Setting the actual output of the above set up
   titlePanel("Timeline of protests"),
   timevisOutput("timelineCustom"),
-  setOptions(list(editable = TRUE)),
   
-br(),
-br(),
+  br(),
+  
+  titlePanel("Item Selected Currently"),
+  fluidRow(textOutput("selected", inline = TRUE)),
+  
+  #insert the "Item currently selected" part
+  
+  br(),
+  br(),
+  br(),
   
   titlePanel("Table of events placed above"),
   DT::dataTableOutput("table")
   )
 
+
+
 #OUTPUT SECTION STARTS HERE
+
+  #adding the "input$selected" part of the code
 server <- function(input, output) {
   data <- data_copy
   output$timelineCustom <- renderTimevis({
@@ -87,6 +94,14 @@ server <- function(input, output) {
     timevis(data, options = config)
   })
   
+  #this is a little section that isn't working about what is being selected
+  output$selected <- renderText(
+    paste(input$timelineCustom_selected, collapse = " ")
+  )
+  
+  observeEvent(input$focusSelection, {
+    centerItem("timelineInteractive", input$timelineCustom_selected)
+  })
   
   output$table <- DT::renderDataTable(DT::datatable({
     data <- data_copy
