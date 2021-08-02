@@ -66,6 +66,28 @@ ui <- fluidPage(
     )
   ),
   
+  fluidRow(
+    column(4,
+           selectInput("tgs",
+                       "Tags:",
+                       c("All",
+                         unique(as.character(data_copy$tags))))
+    ),
+    column(4,
+           selectInput("agnst",
+                       "Against:",
+                       c("All",
+                         unique(as.character(data_copy$against))))
+    ),
+    column(4,
+           selectInput("mth",
+                       "Method:",
+                       c("All",
+                         unique(as.character(data_copy$method))))
+    )
+  ),
+  
+  
   dateRangeInput(
     inputId= "date_range" ,
     label= "Select Date Range to Filter:",
@@ -131,6 +153,7 @@ server <- function(input, output, session) {
       data <- data_copy
       
       #the drop down menu selection reactive functions
+        ## add : "agnst", "tgs", "mth",
       if (input$vc.hv != "All") {
         data <- data[data$college == input$vc.hv,]
       }  
@@ -140,7 +163,16 @@ server <- function(input, output, session) {
       if (input$scp != "All") {
         data <- data[data$group_category == input$grp,]
       }
-    
+      if (input$agnst != "All") {
+        data <- data[data$against == input$agnst,]
+      }
+      if (input$tgs != "All") {
+        data <- data[data$tags == input$tgs,]
+      }
+      if (input$mth != "All") {
+        data <- data[data$method == input$mth,]
+      }
+      
       #date range filter code! which worksssssss!!!!!
       data <- data [which(data$start >= input$date_range[1] & data$start <= input$date_range[2]),]
     
