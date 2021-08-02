@@ -106,14 +106,14 @@ ui <- fluidPage(
   
   br(),
   
-
-  conditionalPanel(condition = "output.show_protest_details", #this needs to be added
+#Panel that shows up when you select something in the timeline
+  conditionalPanel(condition = "timeline_selection", #this needs to be added
                    titlePanel("Item Currently Selected"),
-                   fluidRow(column(4, wellPanel(h3("Object Source"),
+                   fluidRow(column(4, wellPanel(h4("Object Source"),
                                                 htmlOutput(outputId = "protest_source_info")
                    )
                    ),
-                   column(4, wellPanel(h3("Protest Details"),
+                   column(4, wellPanel(h4("Protest Details"),
                                        tableOutput(outputId = "protest_info") 
                    )
                    ),
@@ -126,6 +126,9 @@ ui <- fluidPage(
   br(),
   br(),
   
+  #Table of protest events reflected in the timeline 
+
+### HOW TO MAKE THIS SMALLER ?? AND NOT HAVE OCR EAT UP SO MUCH SPACE
   titlePanel("Table of events in timeline above"),
   DT::dataTableOutput("table")
   )
@@ -136,15 +139,6 @@ ui <- fluidPage(
 
 #adding the "input$selected" part of the code
 server <- function(input, output, session) {
-
-
-
-  #observe a click on the timeline
-  observeEvent(input$focusSelection, {
-    centerItem("timelineInteractive", input$timelineInteractive_selected)
-  })
-  
-  # I don't know what this thing below does
   
   #creating a data table of information variable to inputs of the filter 
     data <- reactive({
@@ -177,7 +171,6 @@ server <- function(input, output, session) {
       data <- data [which(data$start >= input$date_range[1] & data$start <= input$date_range[2]),]
     
     data })
-    
   
 #output to render the table
   output$table <- DT::renderDataTable(DT::datatable(data()))
@@ -186,6 +179,10 @@ server <- function(input, output, session) {
 output$timeline <- renderTimevis({
   timevis(data())
   })
+
+
+#output to render what is currently selected
+
   
 }
 
